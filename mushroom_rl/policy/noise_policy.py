@@ -17,10 +17,8 @@ class OrnsteinUhlenbeckPolicy(ParametricPolicy):
         Constructor.
 
         Args:
-            mu (Regressor): the regressor representing the mean w.r.t. the
-                state;
-            sigma (np.ndarray): average magnitude of the random flactations per
-                square-root time;
+            mu (Regressor): the regressor representing the mean w.r.t. the state;
+            sigma (np.ndarray): average magnitude of the random flactations per square-root time;
             theta (float): rate of mean reversion;
             dt (float): time interval;
             x0 (np.ndarray, None): initial values of noise.
@@ -41,9 +39,7 @@ class OrnsteinUhlenbeckPolicy(ParametricPolicy):
         mu = self._approximator.predict(state)
 
         x = self._x_prev - self._theta * self._x_prev * self._dt +\
-            self._sigma * np.sqrt(self._dt) * np.random.normal(
-                size=self._approximator.output_shape
-            )
+            self._sigma * np.sqrt(self._dt) * np.random.normal(size=self._approximator.output_shape)
         self._x_prev = x
 
         return mu + x

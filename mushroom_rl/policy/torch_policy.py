@@ -187,13 +187,11 @@ class GaussianTorchPolicy(TorchPolicy):
         Constructor.
 
         Args:
-            network (object): the network class used to implement the mean
-                regressor;
+            network (object): the network class used to implement the mean regressor;
             input_shape (tuple): the shape of the state space;
             output_shape (tuple): the shape of the action space;
             std_0 (float, 1.): initial standard deviation;
             params (dict): parameters used by the network constructor.
-
         """
         super().__init__(use_cuda)
 
@@ -202,7 +200,7 @@ class GaussianTorchPolicy(TorchPolicy):
         self._mu = Regressor(TorchApproximator, input_shape, output_shape,
                              network=network, use_cuda=use_cuda, **params)
 
-        log_sigma_init = torch.ones(self._action_dim) * np.log(std_0)
+        log_sigma_init = (torch.ones(self._action_dim) * np.log(std_0)).float()
 
         if self._use_cuda:
             log_sigma_init = log_sigma_init.cuda()

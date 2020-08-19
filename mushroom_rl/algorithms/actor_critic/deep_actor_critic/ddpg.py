@@ -26,22 +26,15 @@ class DDPG(DeepAC):
         Args:
             policy_class (Policy): class of the policy;
             policy_params (dict): parameters of the policy to build;
-            actor_params (dict): parameters of the actor approximator to
-                build;
-            actor_optimizer (dict): parameters to specify the actor optimizer
-                algorithm;
-            critic_params (dict): parameters of the critic approximator to
-                build;
+            actor_params (dict): parameters of the actor approximator to build;
+            actor_optimizer (dict): parameters to specify the actor optimizer algorithm;
+            critic_params (dict): parameters of the critic approximator to build;
             batch_size (int): the number of samples in a batch;
-            initial_replay_size (int): the number of samples to collect before
-                starting the learning;
-            max_replay_size (int): the maximum number of samples in the replay
-                memory;
+            initial_replay_size (int): the number of samples to collect before starting the learning;
+            max_replay_size (int): the maximum number of samples in the replay memory;
             tau (float): value of coefficient for soft updates;
-            policy_delay (int, 1): the number of updates of the critic after
-                which an actor update is implemented;
-            critic_fit_params (dict, None): parameters of the fitting algorithm
-                of the critic approximator;
+            policy_delay (int, 1): the number of updates of the critic after which an actor update is implemented;
+            critic_fit_params (dict, None): parameters of the fitting algorithm of the critic approximator;
 
         """
         self._critic_fit_params = dict() if critic_fit_params is None else critic_fit_params
@@ -92,24 +85,19 @@ class DDPG(DeepAC):
     def fit(self, dataset):
         self._replay_memory.add(dataset)
         if self._replay_memory.initialized:
-            state, action, reward, next_state, absorbing, _ =\
-                self._replay_memory.get(self._batch_size)
+            state, action, reward, next_state, absorbing, _ = self._replay_memory.get(self._batch_size)
 
             q_next = self._next_q(next_state, absorbing)
             q = reward + self.mdp_info.gamma * q_next
 
-            self._critic_approximator.fit(state, action, q,
-                                          **self._critic_fit_params)
+            self._critic_approximator.fit(state, action, q, **self._critic_fit_params)
 
             if self._fit_count % self._policy_delay == 0:
                 loss = self._loss(state)
                 self._optimize_actor_parameters(loss)
 
-            self._update_target(self._critic_approximator,
-                                self._target_critic_approximator)
-            self._update_target(self._actor_approximator,
-                                self._target_actor_approximator)
-
+            self._update_target(self._critic_approximator, self._target_critic_approximator)
+            self._update_target(self._actor_approximator, self._target_actor_approximator)
             self._fit_count += 1
 
     def _loss(self, state):

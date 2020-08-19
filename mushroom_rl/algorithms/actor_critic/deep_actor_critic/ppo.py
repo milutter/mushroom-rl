@@ -28,20 +28,14 @@ class PPO(Agent):
 
         Args:
             policy (TorchPolicy): torch policy to be learned by the algorithm
-            actor_optimizer (dict): parameters to specify the actor optimizer
-                algorithm;
-            critic_params (dict): parameters of the critic approximator to
-                build;
+            actor_optimizer (dict): parameters to specify the actor optimizer algorithm;
+            critic_params (dict): parameters of the critic approximator to build;
             n_epochs_policy (int): number of policy updates for every dataset;
             batch_size (int): size of minibatches for every optimization step
             eps_ppo (float): value for probability ratio clipping;
-            lam float(float, 1.): lambda coefficient used by generalized
-                advantage estimation;
-            quiet (bool, True): if true, the algorithm will print debug
-                information;
-            critic_fit_params (dict, None): parameters of the fitting algorithm
-                of the critic approximator.
-
+            lam float(float, 1.): lambda coefficient used by generalized advantage estimation;
+            quiet (bool, True): if true, the algorithm will print debug information;
+            critic_fit_params (dict, None): parameters of the fitting algorithm of the critic approximator.
         """
         self._critic_fit_params = dict(n_epochs=10) if critic_fit_params is None else critic_fit_params
 

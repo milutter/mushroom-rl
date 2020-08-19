@@ -25,23 +25,15 @@ class TorchApproximator:
             output_shape (tuple): shape of the output of the network;
             network (torch.nn.Module): the network class to use;
             optimizer (dict): the optimizer used for every fit step;
-            loss (torch.nn.functional): the loss function to optimize in the
-                fit method;
-            batch_size (int, 0): the size of each minibatch. If 0, the whole
-                dataset is fed to the optimizer at each epoch;
-            n_fit_targets (int, 1): the number of fit targets used by the fit
-                method of the network;
+            loss (torch.nn.functional): the loss function to optimize in the fit method;
+            batch_size (int, 0): the size of each minibatch. If 0, the whole dataset is fed to the optimizer at each epoch;
+            n_fit_targets (int, 1): the number of fit targets used by the fit method of the network;
             use_cuda (bool, False): if True, runs the network on the GPU;
-            reinitialize (bool, False): if True, the approximator is re
-            initialized at every fit call. To perform the initialization, the
-            weights_init method must be defined properly for the selected
-            model network.
-            dropout (bool, False): if True, dropout is applied only during
-                train;
-            quiet (bool, True): if False, shows two progress bars, one for
-                epochs and one for the minibatches;
-            params (dict): dictionary of parameters needed to construct the
-                network.
+            reinitialize (bool, False): if True, the approximator is reinitialized at every fit call. To perform the initialization, the
+            weights_init method must be defined properly for the selected model network.
+            dropout (bool, False): if True, dropout is applied only during train;
+            quiet (bool, True): if False, shows two progress bars, one for epochs and one for the minibatches;
+            params (dict): dictionary of parameters needed to construct the network.
 
         """
         self._batch_size = batch_size
@@ -51,8 +43,7 @@ class TorchApproximator:
         self._quiet = quiet
         self._n_fit_targets = n_fit_targets
 
-        self.network = network(input_shape, output_shape, use_cuda=use_cuda,
-                               dropout=dropout, **params)
+        self.network = network(input_shape, output_shape, use_cuda=use_cuda, dropout=dropout, **params)
 
         if self._use_cuda:
             self.network.cuda()
@@ -80,8 +71,7 @@ class TorchApproximator:
 
         """
         if not self._use_cuda:
-            torch_args = [torch.from_numpy(x) if isinstance(x, np.ndarray) else x
-                          for x in args]
+            torch_args = [torch.from_numpy(x) if isinstance(x, np.ndarray) else x for x in args]
             val = self.network.forward(*torch_args, **kwargs)
 
             if output_tensor:
@@ -91,15 +81,15 @@ class TorchApproximator:
             else:
                 val = val.detach().numpy()
         else:
-            torch_args = [torch.from_numpy(x).cuda()
-                          if isinstance(x, np.ndarray) else x.cuda() for x in args]
-            val = self.network.forward(*torch_args,
-                                       **kwargs)
+            torch_args = [torch.from_numpy(x).cuda() if isinstance(x, np.ndarray) else x.cuda() for x in args]
+            val = self.network.forward(*torch_args, **kwargs)
 
             if output_tensor:
                 return val
+
             elif isinstance(val, tuple):
                 val = tuple([x.detach().cpu().numpy() for x in val])
+
             else:
                 val = val.detach().cpu().numpy()
 
@@ -112,18 +102,13 @@ class TorchApproximator:
 
         Args:
             *args (list): input, where the last ``n_fit_targets`` elements
-                are considered as the target, while the others are considered
-                as input;
+                are considered as the target, while the others are considered as input;
             n_epochs (int, None): the number of training epochs;
-            weights (np.ndarray, None): the weights of each sample in the
-                computation of the loss;
+            weights (np.ndarray, None): the weights of each sample in the computation of the loss;
             epsilon (float, None): the coefficient used for early stopping;
-            patience (float, 1.): the number of epochs to wait until stop
-                the learning if not improving;
-            validation_split (float, 1.): the percentage of the dataset to use
-                as training set;
-            **kwargs (dict): other parameters used by the fit method of the
-                regressor.
+            patience (float, 1.): the number of epochs to wait until stop the learning if not improving;
+            validation_split (float, 1.): the percentage of the dataset to use as training set;
+            **kwargs (dict): other parameters used by the fit method of the regressor.
 
         """
         if self._reinitialize:
@@ -161,14 +146,10 @@ class TorchApproximator:
                       dynamic_ncols=True, disable=self._quiet,
                       leave=False) as t_epochs:
                 while patience_count < patience and epochs_count < n_epochs:
-                    mean_loss_current = self._fit_epoch(train_args, use_weights,
-                                                        kwargs)
+                    mean_loss_current = self._fit_epoch(train_args, use_weights, kwargs)
 
                     if len(val_args[0]):
-                        mean_val_loss_current = self._compute_batch_loss(
-                            val_args, use_weights, kwargs
-                        )
-
+                        mean_val_loss_current = self._compute_batch_loss(val_args, use_weights, kwargs)
                         loss = mean_val_loss_current.item()
                     else:
                         loss = mean_loss_current
@@ -187,8 +168,7 @@ class TorchApproximator:
         else:
             with trange(n_epochs, disable=self._quiet) as t_epochs:
                 for _ in t_epochs:
-                    mean_loss_current = self._fit_epoch(train_args, use_weights,
-                                                        kwargs)
+                    mean_loss_current = self._fit_epoch(train_args, use_weights, kwargs)
 
                     if not self._quiet:
                         t_epochs.set_postfix(loss=mean_loss_current)
@@ -238,8 +218,7 @@ class TorchApproximator:
         else:
             output_type = y_hat.dtype
 
-        y = [y_i.clone().detach().requires_grad_(False).type(output_type) for y_i
-             in torch_args[-self._n_fit_targets:]]
+        y = [y_i.clone().detach().requires_grad_(False).type(output_type) for y_i in torch_args[-self._n_fit_targets:]]
 
         if self._use_cuda:
             y = [y_i.cuda() for y_i in y]
@@ -299,8 +278,7 @@ class TorchApproximator:
         if not self._use_cuda:
             torch_args = [torch.from_numpy(np.atleast_2d(x)) for x in args]
         else:
-            torch_args = [torch.from_numpy(np.atleast_2d(x)).cuda()
-                          for x in args]
+            torch_args = [torch.from_numpy(np.atleast_2d(x)).cuda() for x in args]
 
         y_hat = self.network(*torch_args, **kwargs)
         n_outs = 1 if len(y_hat.shape) == 0 else y_hat.shape[-1]
@@ -321,7 +299,6 @@ class TorchApproximator:
             gradients.append(g)
 
         g = np.stack(gradients, -1)
-
         return g
 
     @property

@@ -1,3 +1,4 @@
+import sys
 from tqdm import tqdm
 
 
@@ -14,12 +15,9 @@ class Core(object):
         Args:
             agent (Agent): the agent moving according to a policy;
             mdp (Environment): the environment in which the agent moves;
-            callbacks_episode (list): list of callbacks to execute at the end of
-                each learn iteration;
+            callbacks_episode (list): list of callbacks to execute at the end of each learn iteration;
             callback_step (Callback): callback to execute after each step;
-            preprocessors (list): list of state preprocessors to be
-                applied to state variables before feeding them to the
-                agent.
+            preprocessors (list): list of state preprocessors to be applied to state variables before feeding them to the agent.
 
         """
         self.agent = agent
@@ -51,10 +49,8 @@ class Core(object):
         Args:
             n_steps (int, None): number of steps to move the agent;
             n_episodes (int, None): number of episodes to move the agent;
-            n_steps_per_fit (int, None): number of steps between each fit of the
-                policy;
-            n_episodes_per_fit (int, None): number of episodes between each fit
-                of the policy;
+            n_steps_per_fit (int, None): number of steps between each fit of the policy;
+            n_episodes_per_fit (int, None): number of episodes between each fit of the policy;
             render (bool, False): whether to render the environment or not;
             quiet (bool, False): whether to show the progress bar or not.
 
@@ -66,11 +62,9 @@ class Core(object):
         self._n_episodes_per_fit = n_episodes_per_fit
 
         if n_steps_per_fit is not None:
-            fit_condition =\
-                lambda: self._current_steps_counter >= self._n_steps_per_fit
+            fit_condition = lambda: self._current_steps_counter >= self._n_steps_per_fit
         else:
-            fit_condition = lambda: self._current_episodes_counter\
-                                     >= self._n_episodes_per_fit
+            fit_condition = lambda: self._current_episodes_counter >= self._n_episodes_per_fit
 
         self._run(n_steps, n_episodes, fit_condition, render, quiet)
 
@@ -96,37 +90,27 @@ class Core(object):
         return self._run(n_steps, n_episodes, fit_condition, render, quiet,
                          initial_states)
 
-    def _run(self, n_steps, n_episodes, fit_condition, render, quiet,
-             initial_states=None):
+    def _run(self, n_steps, n_episodes, fit_condition, render, quiet, initial_states=None):
         assert n_episodes is not None and n_steps is None and initial_states is None\
             or n_episodes is None and n_steps is not None and initial_states is None\
             or n_episodes is None and n_steps is None and initial_states is not None
 
-        self._n_episodes = len(
-            initial_states) if initial_states is not None else n_episodes
+        self._n_episodes = len(initial_states) if initial_states is not None else n_episodes
 
         if n_steps is not None:
-            move_condition =\
-                lambda: self._total_steps_counter < n_steps
+            move_condition = lambda: self._total_steps_counter < n_steps
 
-            steps_progress_bar = tqdm(total=n_steps,
-                                      dynamic_ncols=True, disable=quiet,
-                                      leave=False)
+            steps_progress_bar = tqdm(total=n_steps, dynamic_ncols=True, disable=quiet, leave=True)
             episodes_progress_bar = tqdm(disable=True)
         else:
-            move_condition =\
-                lambda: self._total_episodes_counter < self._n_episodes
+            move_condition = lambda: self._total_episodes_counter < self._n_episodes
 
             steps_progress_bar = tqdm(disable=True)
-            episodes_progress_bar = tqdm(total=self._n_episodes,
-                                         dynamic_ncols=True, disable=quiet,
-                                         leave=False)
+            episodes_progress_bar = tqdm(total=self._n_episodes, dynamic_ncols=True, disable=quiet, leave=True, file=sys.stdout)
 
-        return self._run_impl(move_condition, fit_condition, steps_progress_bar,
-                              episodes_progress_bar, render, initial_states)
+        return self._run_impl(move_condition, fit_condition, steps_progress_bar, episodes_progress_bar, render, initial_states)
 
-    def _run_impl(self, move_condition, fit_condition, steps_progress_bar,
-                  episodes_progress_bar, render, initial_states):
+    def _run_impl(self, move_condition, fit_condition, steps_progress_bar, episodes_progress_bar, render, initial_states):
         self._total_episodes_counter = 0
         self._total_steps_counter = 0
         self._current_episodes_counter = 0

@@ -24,8 +24,8 @@ except ImportError:
 
 try:
     Mujoco = None
-    from .mujoco import MuJoCo
-    __extras__.append('Mujoco')
+    # from .mujoco import MuJoCo
+    # __extras__.append('Mujoco')
 except ImportError:
     pass
 

@@ -54,8 +54,7 @@ class SACPolicy(Policy):
         raise NotImplementedError
 
     def draw_action(self, state):
-        return self.compute_action_and_log_prob_t(
-            state, compute_log_prob=False).detach().cpu().numpy()
+        return self.compute_action_and_log_prob_t(state, compute_log_prob=False).detach().cpu().numpy()
 
     def compute_action_and_log_prob(self, state):
         """
@@ -169,28 +168,18 @@ class SAC(DeepAC):
         Constructor.
 
         Args:
-            actor_mu_params (dict): parameters of the actor mean approximator
-                to build;
-            actor_sigma_params (dict): parameters of the actor sigm
-                approximator to build;
-            actor_optimizer (dict): parameters to specify the actor
-                optimizer algorithm;
-            critic_params (dict): parameters of the critic approximator to
-                build;
+            actor_mu_params (dict): parameters of the actor mean approximator to build;
+            actor_sigma_params (dict): parameters of the actor sigma approximator to build;
+            actor_optimizer (dict): parameters to specify the actor optimizer algorithm;
+            critic_params (dict): parameters of the critic approximator to build;
             batch_size (int): the number of samples in a batch;
-            initial_replay_size (int): the number of samples to collect before
-                starting the learning;
-            max_replay_size (int): the maximum number of samples in the replay
-                memory;
-            warmup_transitions (int): number of samples to accumulate in the
-                replay memory to start the policy fitting;
+            initial_replay_size (int): the number of samples to collect before starting the learning;
+            max_replay_size (int): the maximum number of samples in the replay memory;
+            warmup_transitions (int): number of samples to accumulate in the replay memory to start the policy fitting;
             tau (float): value of coefficient for soft updates;
             lr_alpha (float): Learning rate for the entropy coefficient;
-            target_entropy (float, None): target entropy for the policy, if
-                None a default value is computed ;
-            critic_fit_params (dict, None): parameters of the fitting algorithm
-                of the critic approximator.
-
+            target_entropy (float, None): target entropy for the policy, if None a default value is computed ;
+            critic_fit_params (dict, None): parameters of the fitting algorithm of the critic approximator.
         """
         self._critic_fit_params = dict() if critic_fit_params is None else critic_fit_params
 
@@ -211,15 +200,11 @@ class SAC(DeepAC):
             critic_params['n_models'] = 2
 
         target_critic_params = deepcopy(critic_params)
-        self._critic_approximator = Regressor(TorchApproximator,
-                                              **critic_params)
-        self._target_critic_approximator = Regressor(TorchApproximator,
-                                                     **target_critic_params)
+        self._critic_approximator = Regressor(TorchApproximator, **critic_params)
+        self._target_critic_approximator = Regressor(TorchApproximator, **target_critic_params)
 
-        actor_mu_approximator = Regressor(TorchApproximator,
-                                          **actor_mu_params)
-        actor_sigma_approximator = Regressor(TorchApproximator,
-                                             **actor_sigma_params)
+        actor_mu_approximator = Regressor(TorchApproximator, **actor_mu_params)
+        actor_sigma_approximator = Regressor(TorchApproximator, **actor_sigma_params)
 
         policy = SACPolicy(actor_mu_approximator,
                            actor_sigma_approximator,
@@ -271,8 +256,7 @@ class SAC(DeepAC):
             q_next = self._next_q(next_state, absorbing)
             q = reward + self.mdp_info.gamma * q_next
 
-            self._critic_approximator.fit(state, action, q,
-                                          **self._critic_fit_params)
+            self._critic_approximator.fit(state, action, q, **self._critic_fit_params)
 
             self._update_target(self._critic_approximator,
                                 self._target_critic_approximator)
@@ -308,8 +292,7 @@ class SAC(DeepAC):
         """
         a, log_prob_next = self.policy.compute_action_and_log_prob(next_state)
 
-        q = self._target_critic_approximator.predict(
-            next_state, a, prediction='min') - self._alpha_np * log_prob_next
+        q = self._target_critic_approximator.predict(next_state, a, prediction='min') - self._alpha_np * log_prob_next
         q *= 1 - absorbing
 
         return q
